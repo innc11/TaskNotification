@@ -1,0 +1,23 @@
+{
+    "times": [
+        "1d",
+        "3h",
+        "72m"
+    ],
+    "check_interval": 10,
+    "administrator_id": 2,
+    "emergency_email": "user@domain.com",
+    "smtp": {
+        "host": "smtpdm.domain.com",
+        "port": 465,
+        "ssl": true,
+        "username": "user@domain.com",
+        "password": "password",
+        "from": "user@domain.com"
+    },
+    "jsonrpc": {
+        "url": "https://domain.com/jsonrpc.php",
+        "username": "jsonrpc",
+        "password": "password"
+    }
+}
