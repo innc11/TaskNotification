@@ -140,6 +140,8 @@ if __name__ == '__main__':
             time.sleep(conf['check_interval'])
     except SystemExit:
         pass
+    except KeyboardInterrupt:
+        pass
     except BaseException:
         subject = 'TaskNotification程序异常退出'
         content = traceback.format_exc()
