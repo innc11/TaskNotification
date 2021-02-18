@@ -49,10 +49,11 @@ if __name__ == '__main__':
 
             for task in tasks:
                 taskId = int(task['id'])
+                taskTitle = task['title']
                 assigneeId = int(task['owner_id'])
                 taskDueDate = int(task['date_due'])
 
-                print(task['title'])
+                print(f'{taskTitle}:{taskId}')
 
                 diff = int(taskDueDate) - int(time.time())
                 remains_day = int(diff / 86400)
@@ -62,8 +63,8 @@ if __name__ == '__main__':
                 remains_single_hour = int(diff / 3600)
                 remains_single_minute = int(diff / 60)
 
-                print(f'day: {remains_day}, hour: {remains_hour}, min: {remains_minute}', end='  |  ')
-                print(f'day: {remains_single_day}, hour: {remains_single_hour}, min: {remains_single_minute}')
+                print(f'left: {remains_day} : {remains_hour} : {remains_minute}', end='  |  ')
+                print(f'time: {remains_single_day} : {remains_single_hour} : {remains_single_minute}')
 
                 metadata = rpc.call('getTaskMetadata', task_id=int(task['id']))
 
@@ -86,13 +87,16 @@ if __name__ == '__main__':
                         number = int(remains[:-1])
                         unit = remains[-1:]
 
+                        if number == 0:
+                            continue
+
                         if not notified:
-                            if unit == 'd' and number > remains_single_day > 0:
+                            if unit == 'd' and number > remains_single_day >= 0:
                                 print(f'notify for {number}{unit}')
                                 ntf[remains] = True
                                 updated = True
                                 remains_time = f'{number}天'
-                            elif unit == 'h' and number > remains_single_hour > 0:
+                            elif unit == 'h' and number > remains_single_hour >= 0:
                                 print(f'notify for {number}{unit}')
                                 ntf[remains] = True
                                 updated = True
@@ -122,11 +126,21 @@ if __name__ == '__main__':
 
                     taskTitle = task['title']
                     taskUrl = task['url']
-                    taskDesc = task['description']
+                    taskDesc = task['description'] if task['description'] != '' else '(No description provided)'
                     taskOverdue = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(taskDueDate))
 
-                    subject = f'任务还有{remains_time}到期'
-                    content = f'任务：{taskTitle}\n描述：{taskDesc}\n\n\n到期时间：{taskOverdue}\n跳转链接：{taskUrl}'
+                    remains_ = ''
+                    if remains_day > 0:
+                        remains_ += f'{remains_day}天'
+                    elif remains_hour > 0:
+                        remains_ += f'{remains_hour}小时'
+                    elif remains_minute > 0:
+                        remains_ += f'{remains_minute}分钟'
+                    else:
+                        remains_ += f'{diff} Seconds'
+
+                    subject = f'任务即将到期：{taskTitle}'
+                    content = f'任务：{taskTitle}\n描述：{taskDesc}\n---------------\n\n剩余时间：{remains_}\n到期时间：{taskOverdue}\n跳转链接：{taskUrl}'
 
                     sendMail(subject, content, emailTo)
                     print('Mail sent')
