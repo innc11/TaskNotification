@@ -131,11 +131,11 @@ if __name__ == '__main__':
 
                     remains_ = ''
                     if remains_day > 0:
-                        remains_ += f'{remains_day}天'
+                        remains_ += f'{remains_day+1}天'  # +1是为了修正int转换的误差
                     elif remains_hour > 0:
-                        remains_ += f'{remains_hour}小时'
+                        remains_ += f'{remains_hour+1}小时'
                     elif remains_minute > 0:
-                        remains_ += f'{remains_minute}分钟'
+                        remains_ += f'{remains_minute+1}分钟'
                     else:
                         remains_ += f'{diff} Seconds'
 
