@@ -75,6 +75,7 @@ if __name__ == '__main__':
 
                     content = 'notification registered: ' + (', '.join(tp.keys()))
                     rpc.call('createComment', task_id=taskId, user_id=3, content=content)
+                    metadata = rpc.call('getTaskMetadata', task_id=int(task['id']))
 
                 ntf = json.loads(metadata['notifications'])
                 updated = False
