@@ -24,5 +24,12 @@ class JsonRpc:
         }
 
         r = requests.post(url=self.url, json=data, headers=headers)
+
         # print(r.text)
-        return json.loads(r.text)['result']
+
+        response = json.loads(r.text)
+
+        if 'error' in response:
+            raise BaseException(r.text)
+
+        return response['result']
