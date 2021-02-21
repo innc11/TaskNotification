@@ -77,6 +77,7 @@ if __name__ == '__main__':
                 print(f'time: {remains_single_day} : {remains_single_hour} : {remains_single_minute}')
 
                 metadata = rpc.call('getTaskMetadata', task_id=int(task['id']))
+                isNewTask = False
 
                 if 'notifications' not in metadata:
                     tp = {k: False for k in conf['times']}
@@ -87,6 +88,8 @@ if __name__ == '__main__':
                     content = 'notification registered: ' + (', '.join(tp.keys()))
                     rpc.call('createComment', task_id=taskId, user_id=account_id, content=content)
                     metadata = rpc.call('getTaskMetadata', task_id=int(task['id']))
+
+                    isNewTask = True
 
                 ntf = json.loads(metadata['notifications'])
                 updated = False
@@ -122,38 +125,39 @@ if __name__ == '__main__':
                         'notifications': json.dumps(ntf)
                     })
 
-                    emailTo = ''
-                    if assigneeId != 0:
-                        user = rpc.call('getUser', user_id=assigneeId)
-                        if user['email'] != '':
-                            emailTo = user['email']
+                    if not isNewTask:
+                        emailTo = ''
+                        if assigneeId != 0:
+                            user = rpc.call('getUser', user_id=assigneeId)
+                            if user['email'] != '':
+                                emailTo = user['email']
+                            else:
+                                admin = rpc.call('getUser', user_id=conf['administrator_id'])
+                                emailTo = admin['email']
                         else:
                             admin = rpc.call('getUser', user_id=conf['administrator_id'])
                             emailTo = admin['email']
-                    else:
-                        admin = rpc.call('getUser', user_id=conf['administrator_id'])
-                        emailTo = admin['email']
 
-                    taskTitle = task['title']
-                    taskUrl = task['url']
-                    taskDesc = task['description'] if task['description'] != '' else '(No description provided)'
-                    taskOverdue = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(taskDueDate))
+                        taskTitle = task['title']
+                        taskUrl = task['url']
+                        taskDesc = task['description'] if task['description'] != '' else '(No description provided)'
+                        taskOverdue = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(taskDueDate))
 
-                    remains_ = ''
-                    if remains_day > 0:
-                        remains_ += f'{remains_day+1}天'  # +1是为了修正int转换的误差
-                    elif remains_hour > 0:
-                        remains_ += f'{remains_hour+1}小时'
-                    elif remains_minute > 0:
-                        remains_ += f'{remains_minute+1}分钟'
-                    else:
-                        remains_ += f'{diff} Seconds'
+                        remains_ = ''
+                        if remains_day > 0:
+                            remains_ += f'{remains_day+1}天'  # +1是为了修正int转换的误差
+                        elif remains_hour > 0:
+                            remains_ += f'{remains_hour+1}小时'
+                        elif remains_minute > 0:
+                            remains_ += f'{remains_minute+1}分钟'
+                        else:
+                            remains_ += f'{diff} Seconds'
 
-                    subject = f'任务即将到期：{taskTitle}'
-                    content = f'任务：{taskTitle}\n描述：{taskDesc}\n---------------\n\n剩余时间：{remains_}\n到期时间：{taskOverdue}\n跳转链接：{taskUrl}'
+                        subject = f'任务即将到期：{taskTitle}'
+                        content = f'任务：{taskTitle}\n描述：{taskDesc}\n---------------\n\n剩余时间：{remains_}\n到期时间：{taskOverdue}\n跳转链接：{taskUrl}'
 
-                    sendMail(subject, content, emailTo)
-                    print('Mail sent')
+                        sendMail(subject, content, emailTo)
+                        print('Mail sent')
 
                     metadata = rpc.call('getTaskMetadata', task_id=int(task['id']))
 
