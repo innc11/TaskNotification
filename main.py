@@ -48,8 +48,6 @@ if __name__ == '__main__':
             for proj in projects:
                 r = rpc.call('getAllTasks', project_id=int(proj['id']), status_id=1)
                 tasks += [t for t in r]
-                r = rpc.call('getAllTasks', project_id=int(proj['id']), status_id=0)
-                tasks += [t for t in r]
 
             for task in tasks:
                 if task['date_started'] == '0':
