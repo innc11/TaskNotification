@@ -36,6 +36,8 @@ if __name__ == '__main__':
 
     rpc = JsonRpc(conf['jsonrpc']['url'], conf['jsonrpc']['username'], conf['jsonrpc']['password'])
 
+    account_id = 3
+
     try:
         while(True):
 
@@ -46,8 +48,16 @@ if __name__ == '__main__':
             for proj in projects:
                 r = rpc.call('getAllTasks', project_id=int(proj['id']), status_id=1)
                 tasks += [t for t in r]
+                r = rpc.call('getAllTasks', project_id=int(proj['id']), status_id=0)
+                tasks += [t for t in r]
 
             for task in tasks:
+                if task['date_started'] == '0':
+                    continue
+
+                if task['date_completed'] == '0':
+                    continue
+
                 taskId = int(task['id'])
                 taskTitle = task['title']
                 assigneeId = int(task['owner_id'])
@@ -75,7 +85,7 @@ if __name__ == '__main__':
                     })
 
                     content = 'notification registered: ' + (', '.join(tp.keys()))
-                    rpc.call('createComment', task_id=taskId, user_id=3, content=content)
+                    rpc.call('createComment', task_id=taskId, user_id=account_id, content=content)
                     metadata = rpc.call('getTaskMetadata', task_id=int(task['id']))
 
                 ntf = json.loads(metadata['notifications'])
@@ -158,11 +168,13 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         pass
     except BaseException:
-        subject = 'TaskNotification程序异常退出'
-        content = traceback.format_exc()
-        receiver = conf['emergency_email']
+        if conf['enable_emergency_email']:
+            subject = 'TaskNotification程序异常退出'
+            content = traceback.format_exc()
+            receiver = conf['emergency_email']
 
-        traceback.print_exc()
-        sendMail(subject, content, receiver)
-        print('Exception Reported to '+receiver)
-
+            traceback.print_exc()
+            sendMail(subject, content, receiver)
+            print('Exception Reported to '+receiver)
+        else:
+            traceback.print_exc()

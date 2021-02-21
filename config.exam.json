@@ -6,6 +6,7 @@
     ],
     "check_interval": 10,
     "administrator_id": 2,
+    "enable_emergency_email": true,
     "emergency_email": "user@domain.com",
     "smtp": {
         "host": "smtpdm.domain.com",
